@@ -73,9 +73,34 @@ tendermint通过在应用程序和共识程序间提供一个非常简单的api�
 
 ABCI包含三种从core发送到应用的信息类型。
 
-DeliverTX消息在应用中经常出现。区块链每笔交易都使用这种消息。应用
+DeliverTx message是消息中的主力。区块链中的每笔交易都通过这种message。应用需要验证DeliverTx message收到的每笔交易检查当前状态，应用协议，交易的加密证书。一个验证过的交易需要更新应用state-通过把值绑定到key上，或者更新到UTXO数据库，
 
+CheckTx message和DeliverTx类似，但是它只为了验证交易。Tendermint Core的内存池首先使用CheckTx检查交易的合法性，然后把合法的交易发送。比如，应用可能检查交易中增长的序列数，如果序列号旧了，则返回错误。此外，
 
+Commit message用于计算当前应用状态加密结果，用来放到下个区块头。不一致的更新表现为区块链分叉，导致一系列错误。这也简化了安全情节点的开发，Merkle hash能被区块hash验证，并被法定人数签名。
+
+ABIC连接应用的socket可以很多。Tendermint Core创建了3个；一个验证交易-当交易在mempool中广播，一个帮共识引擎提交区块提案，一个查询应用状态
+
+应用的设计者，要很小心的设计应用，要处理message，并提供启动的地方
+
+## A Note on Determinism
+区块链上的交易程序的逻辑必须是确定性的。如果逻辑不确定，将无法共识
+有些不能确定的要避免，如下：
+
+- 随机数
+- 线程速度（避免多线程一起）
+- 系统时钟
+- 未初始化的内存
+- 浮点数运算
+- 随机的语言特性
+
+## Consensus Overview
+tendermint很好理解的，大部分是异步，的BFT共识协议。
+协议中的参与方叫validators；他们轮流提交区块并投票。区块在脸上被提交，一个区块对应一个高度。区块可能提交失败，这将导致协议到下一轮，然后一个新的validator再提交区块。成功提交区块需要两部；pre-vote和pre-commit。一个区块可以被提交当超过2/3的validators预提交再同一轮同一个区块。
+
+## Stake
+在许多系统，我们不考虑1/3或2/3的validator，而是考虑stake。
+The Cosmos Network就是一个加密pos机制，使用ABCI系统实现系统的。
 
 
 
