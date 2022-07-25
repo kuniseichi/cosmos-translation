@@ -211,33 +211,6 @@ tendermint gen_validator
 
 ### Local Network
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+要在本地运行网络，你必须修改config.toml中的_laddr字段，保证监听地址不会冲突。此外需要在config.toml中设置addr_book_strict=false，否则Tendermint p2p库会拒绝链接相同ip地址的peer。
 
 
